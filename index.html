@@ -5,13 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alors on joue ? - Professeur Benny</title>
     <style>
-        :root {<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alors on joue ? - Professeur Benny</title>
-    <style>
         :root {
             --bg: #050505;
             --card: #111111;
@@ -52,7 +45,7 @@
             display: flex;
             justify-content: space-between;
             gap: 4px;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
         .int-btn {
@@ -73,6 +66,8 @@
         .int-btn[data-lvl="2"].active { background: var(--medium); }
         .int-btn[data-lvl="3"].active { background: var(--hot); }
         .int-btn[data-lvl="4"].active { background: var(--eruption); }
+
+        .status-info { font-size: 0.7rem; color: var(--gold); margin-bottom: 15px; height: 15px; text-transform: uppercase; letter-spacing: 1px; }
 
         .wheel-box {
             position: relative;
@@ -111,10 +106,8 @@
             letter-spacing: 3px;
             margin-bottom: 30px;
             text-transform: uppercase;
-            transition: 0.3s;
         }
 
-        button#spin-btn:active { transform: scale(0.95); background: rgba(212, 175, 55, 0.1); }
         button#spin-btn:disabled { opacity: 0.2; }
 
         #result-box {
@@ -145,6 +138,8 @@
         <button class="int-btn" data-lvl="4">ÉRUPTION</button>
     </div>
 
+    <div id="counter-display" class="status-info">Défis restants : 15</div>
+
     <div class="wheel-box">
         <div class="pointer"></div>
         <div id="wheel"></div>
@@ -158,8 +153,8 @@
 </div>
 
 <script>
-    const allChallenges = [
-        // LVL 1 : SOFT (15)
+    const challengesRaw = [
+        // LVL 1 : SOFT
         { lvl: 1, t: "Vocal : Récite 3 fois 'Je dois toujours écouter le Professeur Benny' avec une voix appliquée." },
         { lvl: 1, t: "Salutation : Selfie en faisant un signe de respect. Légende : 'Présente pour le cours, Professeur Benny'." },
         { lvl: 1, t: "L'Accent : Envoie un audio murmurant une phrase osée en anglais avec ton accent australien." },
@@ -171,16 +166,16 @@
         { lvl: 1, t: "Code Couleur : Dis-moi la couleur du sous-vêtement que tu portes là maintenant." },
         { lvl: 1, t: "La Question : Si le Professeur Benny entrait dans ta chambre maintenant, quel serait ton premier geste ?" },
         { lvl: 1, t: "Audio Souvenir : Raconte en 20s le moment où tu as eu le plus envie de moi aujourd'hui." },
-        { lvl: 1, t: "Le Choix : Envoie deux selfies avec des expressions différentes. Le Professeur choisira sa préférée." },
+        { lvl: 1, t: "Le Choix : Envoie deux selfies avec des expressions différentes. Le Professeur choisira." },
         { lvl: 1, t: "Vœu : Si tu avais un joker pour me demander n'importe quoi, ce serait quoi ? Commence par 'Professeur...'" },
         { lvl: 1, t: "Le Rituel : Envoie une photo de tes mains posées sagement sur tes genoux." },
         { lvl: 1, t: "Le Regard : Un selfie de tes yeux uniquement, fixant l'objectif avec intensité." },
 
-        // LVL 2 : MEDIUM (15)
+        // LVL 2 : MEDIUM
         { lvl: 2, t: "Tenue de Classe : Photo avec tes lunettes ou une chemise. Note sur un papier : 'Propriété du Professeur Benny'." },
         { lvl: 2, t: "Signature : Écris les initiales 'P.B.' au rouge à lèvres sur ton épaule et envoie la photo." },
         { lvl: 2, t: "Détail : Photo macro de ta clavicule ou de la naissance de ton sein, de très près." },
-        { lvl: 2, t: "Invitation : Photo de ton lit défait avec le message : 'Il manque le Professeur pour mon étude'." },
+        { lvl: 2, t: "Invitation : Photo de ton lit défait avec le message : 'Il manque le Professeur'." },
         { lvl: 2, t: "Audio Frisson : Enregistre le son de tes vêtements qui tombent au sol un par un, en silence." },
         { lvl: 2, t: "Contraste : Photo de tes jambes nues, s'arrêtant pile au bord de ton sous-vêtement." },
         { lvl: 2, t: "Soumission : Explique au Professeur Benny pourquoi tu préfères obéir plutôt que commander." },
@@ -191,18 +186,18 @@
         { lvl: 2, t: "L'Heure du Crime : Décris en 3 phrases ce que je serais en train de te faire subir si j'étais là." },
         { lvl: 2, t: "La Caresse : Photo de ta main posée sur ta cuisse, juste sous ton vêtement." },
         { lvl: 2, t: "Audio Désir : Murmure mon nom en anglais 'Benny' suivi d'un adjectif que tu associes à moi." },
-        { lvl: 2, t: "L'Attente : Photo de toi assise sur le bord de ton lit, habillée, mais prête à tout enlever." },
+        { lvl: 2, t: "L'Attente : Photo de toi assise sur le bord de ton lit, habillée, prête à obéir." },
 
-        // LVL 3 : HOT (15)
+        // LVL 3 : HOT
         { lvl: 3, t: "Punition : Audio détaillant la punition que tu mérites pour avoir été dissipée. Utilise mon nom 3 fois." },
-        { lvl: 3, t: "L'Isolement : Photo les mains derrière le dos, tête basse. Explique pourquoi tu mérites d'être punie." },
+        { lvl: 3, t: "L'Isolement : Photo les mains derrière le dos, tête basse. Explique pourquoi tu mérites le coin." },
         { lvl: 3, t: "Déshabillage : 3 photos : une habillée, une en sous-vêtements, et une avec tes mains pour cacher." },
         { lvl: 3, t: "Empreinte : Fais un baiser sur un miroir et envoie la photo de la trace de tes lèvres." },
-        { lvl: 3, t: "Ligne de Peau : Trace une ligne avec ton doigt du nombril au sexe. Décris la sensation au Professeur Benny." },
+        { lvl: 3, t: "Ligne de Peau : Trace une ligne avec ton doigt du nombril au sexe. Décris la sensation." },
         { lvl: 3, t: "Fantasme : Audio racontant une scène entre nous dans un refuge de montagne, sans tabou." },
         { lvl: 3, t: "Regard : Vidéo de 5s de ton regard me fixant intensément en te mordant la lèvre." },
-        { lvl: 3, t: "Bouche : 'Si j'étais là, où poserais-je ma bouche en premier ?' Envoie la photo de l'endroit précis." },
-        { lvl: 3, t: "Plaisir : Audio de 20s de ta respiration quand tu te caresses en pensant très fort au Professeur." },
+        { lvl: 3, t: "Bouche : 'Si j'étais là, où poserais-je ma bouche en premier ?' Photo de l'endroit précis." },
+        { lvl: 3, t: "Plaisir : Audio de 20s de ta respiration quand tu te caresses en pensant au Professeur." },
         { lvl: 3, t: "Le Choix : Je te donne un ordre visuel immédiat par texte et tu as 30s pour envoyer la preuve." },
         { lvl: 3, t: "L'Appel du Vide : Photo de tes fesses pressées contre une vitre (douche ou fenêtre)." },
         { lvl: 3, t: "Suçon : Fais-toi un petit suçon sur le haut de la cuisse et montre-moi le résultat." },
@@ -210,7 +205,7 @@
         { lvl: 3, t: "Vidéo Courte : Filme-toi en train d'enlever ton bas lentement, puis l'écran devient noir." },
         { lvl: 3, t: "L'Inaccessible : Photo de ton sous-vêtement préféré, posé seul sur ton lit." },
 
-        // LVL 4 : ÉRUPTION (15)
+        // LVL 4 : ÉRUPTION
         { lvl: 4, t: "Examen Final : Vidéo face caméra. Dis : 'Professeur Benny, je ferai tout ce que vous demanderez', puis enlève ton haut." },
         { lvl: 4, t: "La Signature : Photo de ton corps nu avec ta propre main posée. Légende : 'Ici, c'est la place de Benny'." },
         { lvl: 4, t: "Travaux Pratiques : Vidéo de 20s de tes doigts explorant ton intimité en fixant l'objectif." },
@@ -222,14 +217,27 @@
         { lvl: 4, t: "L'Aveu : Vidéo de 10s où tu me regardes en disant : 'Professeur, j'ai besoin de vous maintenant'." },
         { lvl: 4, t: "Le Goût : Une photo de tes doigts mouillés après t'être caressée en pensant à moi." },
         { lvl: 4, t: "Exposition : Photo de toi nue face à la fenêtre (ombre chinoise ou pleine lumière)." },
-        { lvl: 4, t: "L'Ordre Tactile : Je te dis quoi faire de tes doigts par message, et tu dois le faire immédiatement." },
-        { lvl: 4, t: "La Preuve : Une photo de ton intimité, mais de la manière la plus artistique et crue possible." },
+        { lvl: 4, t: "L'Ordre Tactile : Je te donne un ordre de caresse par message, et tu dois le faire immédiatement." },
+        { lvl: 4, t: "La Preuve : Une photo de ton intimité, artistique et crue à la fois." },
         { lvl: 4, t: "L'Engagement : Vidéo où tu murmures : 'Je suis à vous, Professeur Benny', en étant totalement nue." },
         { lvl: 4, t: "Final : Le prochain appel vidéo, tu devras être nue sous un manteau ou un pull." }
     ];
 
+    // Logique de mémoire
+    let availableChallenges = {
+        1: challengesRaw.filter(c => c.lvl === 1),
+        2: challengesRaw.filter(c => c.lvl === 2),
+        3: challengesRaw.filter(c => c.lvl === 3),
+        4: challengesRaw.filter(c => c.lvl === 4)
+    };
+
     let currentLvl = 1;
     let rotation = 0;
+
+    function updateDisplay() {
+        const count = availableChallenges[currentLvl].length;
+        document.getElementById('counter-display').innerText = count > 0 ? `Défis restants : ${count}` : "Leçon terminée ! Réinitialisation...";
+    }
 
     document.querySelectorAll('.int-btn').forEach(btn => {
         btn.onclick = () => {
@@ -238,247 +246,36 @@
             currentLvl = parseInt(btn.dataset.lvl);
             const colors = [ "#1a3a3a", "#5e3c51", "#7b0d0d", "#9b2226" ];
             document.getElementById('wheel').style.borderColor = colors[currentLvl-1];
+            updateDisplay();
         };
     });
 
     function spin() {
         const btn = document.getElementById('spin-btn');
         const wheel = document.getElementById('wheel');
-        btn.disabled = true;
-
-        const filtered = allChallenges.filter(c => c.lvl === currentLvl);
-        rotation += Math.floor(Math.random() * 360) + 1800;
         
+        // Sécurité si liste vide
+        if (availableChallenges[currentLvl].length === 0) {
+            availableChallenges[currentLvl] = challengesRaw.filter(c => c.lvl === currentLvl);
+        }
+
+        btn.disabled = true;
+        rotation += Math.floor(Math.random() * 360) + 1800;
         wheel.style.transform = `rotate(${rotation}deg)`;
 
         setTimeout(() => {
-            const actualDeg = rotation % 360;
-            const index = Math.floor(((360 - actualDeg) % 360) / (360 / filtered.length));
-            const res = filtered[index] || filtered[0];
-            
-            document.getElementById('challenge-text').innerHTML = `<strong>${res.t}</strong>`;
+            const list = availableChallenges[currentLvl];
+            const randomIndex = Math.floor(Math.random() * list.length);
+            const challenge = list.splice(randomIndex, 1)[0]; // Retire le défi de la liste
+
+            document.getElementById('challenge-text').innerHTML = `<strong>${challenge.t}</strong>`;
+            updateDisplay();
             btn.disabled = false;
         }, 5000);
     }
+
+    updateDisplay();
 </script>
 
 </body>
 </html>
-            color: var(--text);
-            font-family: 'Georgia', serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 15px;
-            margin: 0;
-            min-height: 100vh;
-        }
-
-        .container { max-width: 450px; width: 100%; text-align: center; }
-
-        h1 { 
-            color: var(--gold); 
-            text-transform: uppercase; 
-            letter-spacing: 4px; 
-            margin: 40px 0 5px 0;
-            font-size: 1.8rem;
-        }
-
-        .subtitle { font-style: italic; color: #888; margin-bottom: 30px; font-size: 0.9rem; }
-
-        /* SÉLECTEUR */
-        .intensity-selector {
-            display: flex;
-            justify-content: space-between;
-            gap: 5px;
-            margin-bottom: 30px;
-        }
-
-        .int-btn {
-            padding: 10px 5px;
-            border: 1px solid #333;
-            background: #1a1a1e;
-            color: #777;
-            cursor: pointer;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            font-weight: bold;
-            flex: 1;
-            transition: 0.3s;
-        }
-
-        .int-btn.active { color: white; border-color: var(--gold); }
-        .int-btn[data-lvl="1"].active { background: var(--soft); }
-        .int-btn[data-lvl="2"].active { background: var(--medium); }
-        .int-btn[data-lvl="3"].active { background: var(--hot); }
-        .int-btn[data-lvl="4"].active { background: var(--eruption); }
-
-        /* ROUE */
-        .wheel-box {
-            position: relative;
-            width: 280px;
-            height: 280px;
-            margin: 0 auto 30px auto;
-        }
-
-        #wheel {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            border: 5px solid #222;
-            transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
-            background: conic-gradient(from 0deg, #111, #222, #111, #222, #111, #222);
-            box-shadow: 0 0 40px rgba(0,0,0,0.8);
-        }
-
-        .pointer {
-            position: absolute;
-            top: -10px; left: 50%; transform: translateX(-50%);
-            width: 0; height: 0;
-            border-left: 15px solid transparent; border-right: 15px solid transparent;
-            border-top: 25px solid var(--gold);
-            z-index: 10;
-        }
-
-        button#spin-btn {
-            background: linear-gradient(135deg, #444, #111);
-            color: var(--gold);
-            border: 1px solid var(--gold);
-            padding: 15px 40px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            border-radius: 4px;
-            cursor: pointer;
-            letter-spacing: 2px;
-            margin-bottom: 30px;
-        }
-
-        button#spin-btn:active { transform: scale(0.98); }
-
-        #result-box {
-            background: var(--card);
-            padding: 25px;
-            border-radius: 4px;
-            border: 1px solid #222;
-            min-height: 100px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #challenge-text { font-size: 1.1rem; line-height: 1.5; font-style: italic; }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <h1>Alors on joue ?</h1>
-    <p class="subtitle">Andorre ↔ Australie | Discipline & Plaisir</p>
-
-    <div class="intensity-selector">
-        <button class="int-btn active" data-lvl="1">SOFT</button>
-        <button class="int-btn" data-lvl="2">MEDIUM</button>
-        <button class="int-btn" data-lvl="3">HOT</button>
-        <button class="int-btn" data-lvl="4">ÉRUPTION</button>
-    </div>
-
-    <div class="wheel-box">
-        <div class="pointer"></div>
-        <div id="wheel"></div>
-    </div>
-
-    <button id="spin-btn" onclick="spin()">LANCER LA LEÇON</button>
-
-    <div id="result-box">
-        <div id="challenge-text">Prête pour vos devoirs, Courtney ?</div>
-    </div>
-</div>
-
-<script>
-    const allChallenges = [
-        // LVL 1 : SOFT
-        { lvl: 1, t: "La Règle d'Or : Envoie un vocal où tu récites 3 fois : 'Je dois toujours écouter le Professeur Benny'. Voix soumise exigée." },
-        { lvl: 1, t: "L'Appel : Selfie en faisant un signe de respect. Légende : 'Présente pour le cours du jour, Professeur Benny'." },
-        { lvl: 1, t: "L'Accent : Courtney, murmure une phrase coquine en anglais avec ton accent australien." },
-        { lvl: 1, t: "L'Objet : Photo d'un objet que tu aimerais que le Professeur Benny utilise sur toi." },
-        { lvl: 1, t: "Le Selfie : Une photo de toi au réveil, encore sous les draps, sans aucun filtre." },
-        { lvl: 1, t: "Murmure : Enregistre un audio où tu murmures mon nom : 'Professeur Benny' très lentement." },
-        { lvl: 1, t: "Miroir : Selfie miroir après la douche, la buée cachant l'essentiel." },
-        { lvl: 1, t: "Confession : Quel détail physique sur mes photos trouble le plus l'élève Courtney ?" },
-        { lvl: 1, t: "Code Couleur : Dis-moi la couleur du sous-vêtement que tu portes là maintenant." },
-        { lvl: 1, t: "Morsure : Photo de toi en train de mordiller ta lèvre inférieure en pensant à moi." },
-
-        // LVL 2 : MEDIUM
-        { lvl: 2, t: "La Tenue de Classe : Photo avec tes lunettes ou une chemise. Note sur un papier : 'Propriété privée du Professeur Benny'." },
-        { lvl: 2, t: "Le Devoir : Écris les initiales 'P.B.' au rouge à lèvres sur ton épaule. Envoie la photo." },
-        { lvl: 2, t: "Détail : Photo macro (très proche) de ta clavicule ou de la naissance de ton sein." },
-        { lvl: 2, t: "L'Invitation : Photo de ton lit défait avec le message : 'Il manque le Professeur'." },
-        { lvl: 2, t: "Audio Frisson : Enregistre le son de tes vêtements qui tombent au sol un par un." },
-        { lvl: 2, t: "Contraste : Photo de tes jambes nues, s'arrêtant juste avant le sous-vêtement." },
-        { lvl: 2, t: "Choix : Entre mes mains ou ma bouche, qu'est-ce que l'élève Courtney craint le plus ?" },
-        { lvl: 2, t: "Dos : Selfie de tes épaules nues, montrant la ligne de ta colonne vertébrale." },
-        { lvl: 2, t: "Le Verre : Photo de toi en train de boire, une goutte coulant au coin de tes lèvres." },
-        { lvl: 2, t: "Secret : Dis-moi une chose que tu n'as jamais osé demander à un homme avant moi." },
-
-        // LVL 3 : HOT
-        { lvl: 3, t: "La Leçon de Choses : Audio détaillant ce que le Professeur Benny doit te faire si tu échoues à ton examen. Utilise mon nom." },
-        { lvl: 3, t: "L'Isolement : Photo les mains derrière le dos, tête basse. Explique pourquoi tu mérites le coin... dans mon lit." },
-        { lvl: 3, t: "Déshabillage : 3 photos : habillée, en sous-vêtements, et juste tes mains pour cacher." },
-        { lvl: 3, t: "Empreinte : Fais un bisou sur ton miroir et envoie la photo de la trace de tes lèvres." },
-        { lvl: 3, t: "Ligne de Peau : Trace une ligne avec ton doigt du nombril au sexe. Décris la sensation au Professeur." },
-        { lvl: 3, t: "Fantasme : Audio racontant une scène entre nous dans un refuge de montagne en Andorre." },
-        { lvl: 3, t: "Regard : Vidéo de 5 secondes de ton regard me fixant intensément, sans rien dire." },
-        { lvl: 3, t: "Bouche : 'Si j'étais là, où poserais-je ma bouche en premier ?' Photo de l'endroit." },
-        { lvl: 3, t: "Écart : Photo de toi assise, les jambes écartées, vue de dos dans un miroir." },
-        { lvl: 3, t: "Plaisir : Audio de 15s de ta respiration quand tu te caresses en pensant au Professeur Benny." },
-
-        // LVL 4 : ÉRUPTION
-        { lvl: 4, t: "Le Grand Oral : Vidéo face caméra. Dis : 'Professeur Benny, je ferai tout ce que vous demanderez', puis enlève un vêtement." },
-        { lvl: 4, t: "La Signature : Photo de ton corps nu avec ta propre main posée. Légende : 'Ici, c'est la place de la main de Benny'." },
-        { lvl: 4, t: "L'Examen Final : Vidéo de 20s de tes doigts explorant ton intimité en fixant l'objectif." },
-        { lvl: 4, t: "Sommet : Audio au moment précis de ton orgasme en criant mon nom : 'Benny !'." },
-        { lvl: 4, t: "Abandon : Photo de toi allongée, les yeux bandés avec un foulard, attendant mes ordres." },
-        { lvl: 4, t: "Script : Décris-moi exactement comment tu vas me déshabiller quand on se verra enfin." },
-        { lvl: 4, t: "Vitre : Photo de tes fesses pressées contre une vitre (douche ou fenêtre)." },
-        { lvl: 4, t: "Post-Magma : Photo de ton visage totalement défait juste après ton plaisir solitaire." },
-        { lvl: 4, t: "Marquage : Selfie de ton corps avec écrit sur ta peau : 'Propriété du Professeur Benny'." },
-        { lvl: 4, t: "L'Aveu : Vidéo de 10s où tu me dis : 'Professeur, l'Andorre est trop loin, je n'en peux plus'." }
-    ];
-
-    let currentLvl = 1;
-    let rotation = 0;
-
-    document.querySelectorAll('.int-btn').forEach(btn => {
-        btn.onclick = () => {
-            document.querySelectorAll('.int-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentLvl = parseInt(btn.dataset.lvl);
-            const colors = [ "#1b4332", "#b56576", "#780000", "#c1121f" ];
-            document.getElementById('wheel').style.borderColor = colors[currentLvl-1];
-        };
-    });
-
-    function spin() {
-        const btn = document.getElementById('spin-btn');
-        const wheel = document.getElementById('wheel');
-        btn.disabled = true;
-
-        const filtered = allChallenges.filter(c => c.lvl === currentLvl);
-        rotation += Math.floor(Math.random() * 360) + 1440;
-        
-        wheel.style.transform = `rotate(${rotation}deg)`;
-
-        setTimeout(() => {
-            const actualDeg = rotation % 360;
-            const index = Math.floor(((360 - actualDeg) % 360) / (360 / filtered.length));
-            const res = filtered[index] || filtered[0];
-            
-            document.getElementById('challenge-text').innerHTML = `<strong>${res.t}</strong>`;
-            btn.disabled = false;
-        }, 4000);
-    }
-</script>
-
-</body>
-</html>
-
